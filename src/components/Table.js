@@ -10,6 +10,8 @@ function Table() {
   const [comparision, setComparision] = useState('maior que');
   const [valueFilter, setValueFilter] = useState(0);
   const [filtered, setFiltered] = useState([]);
+  const [subjectOrder, setSubjectOrder] = useState([]);
+  const [typeOfOrder, setTypeOfOrder] = useState('ASC');
 
   // FUNÇÃO PARA FETCH API COM USEEFFECT
   const fetchMyApi = useCallback(async () => {
@@ -23,19 +25,16 @@ function Table() {
 
   useEffect(() => {
     setSubject(subjectList[0]);
+    setSubjectOrder(subjectList[0]);
   }, [subjectList]);
 
   // FILTRO PARA NOME
-  const nameFilter = planetsData.filter(
-    (planet) => planet.name.includes(name),
-  );
 
   // FILTRO PARA FILTROS MULTIPLOS NO SUBMIT
   const buttonSubmit = () => {
     const filteredData = planetsData.filter((planet) => {
       const findSubject = subjectList.find((item) => item === subject);
       setSubjectList(subjectList.filter((item) => item !== findSubject));
-      console.log(findSubject);
       if (comparision === 'maior que') {
         return Number(planet[subject]) > valueFilter;
       } if (comparision === 'menor que') {
@@ -43,6 +42,7 @@ function Table() {
       } if (comparision === 'igual a' && planet[subject] === valueFilter) {
         return planet;
       }
+      // return planet;
     });
     setPlanetsData(filteredData);
 
@@ -51,9 +51,37 @@ function Table() {
       { subject, comparision, valueFilter },
     ]);
   };
-  console.log(filtered);
 
-  console.log(subject);
+  const sortSubmit = () => {
+    if (typeOfOrder === 'ASC') {
+      const sortedAsc = planetsData.sort((a, b) => {
+        if (a[subjectOrder] === 'unknown') return Number('1');
+        if (b[subjectOrder] === 'unknown') return Number('-1');
+        if (a[subjectOrder] === b[subjectOrder]) return Number('0');
+        return a[subjectOrder] - b[subjectOrder];
+      });
+      setPlanetsData(sortedAsc);
+    } if (typeOfOrder === 'DESC') {
+      const sortedDesc = planetsData.sort((a, b) => {
+        if (a[subjectOrder] === 'unknown') return Number('1');
+        if (b[subjectOrder] === 'unknown') return Number('-1');
+        if (a[subjectOrder] === b[subjectOrder]) return Number('0');
+        return b[subjectOrder] - a[subjectOrder];
+      });
+      setPlanetsData(sortedDesc);
+    }
+    // return planetsData;
+  };
+
+  const nameFilter = planetsData.filter(
+    (planet) => planet.name.includes(name),
+  );
+
+  console.log(typeOfOrder);
+  console.log(subjectOrder);
+  // console.log(planetsData);
+  // console.log(nameFilter);
+
   return (
     <>
       <section>
@@ -71,9 +99,10 @@ function Table() {
           onChange={ (e) => setSubject(e.target.value) }
           data-testid="column-filter"
         >
+
           {subjectList.map((
             subjects,
-          ) => (<option value={ subjects }>{ subjects }</option>))}
+          ) => (<option key={ subjects } value={ subjects }>{ subjects }</option>))}
         </select>
 
         <select
@@ -97,18 +126,53 @@ function Table() {
         >
           FILTRAR
         </button>
-        {/*
+
+        <h4>Ordenação de coluna</h4>
+        <select
+          value={ subjectOrder }
+          onChange={ (e) => setSubjectOrder(e.target.value) }
+          data-testid="column-sort"
+        >
+
+          {subjectList.map((
+            subjects,
+          ) => (<option key={ subjects } value={ subjects }>{ subjects }</option>))}
+        </select>
+
+        <input
+          type="radio"
+          data-testid="column-sort-input-asc"
+          name="ASC"
+          value="ASC"
+          id="ASC"
+          // checked={ typeOfOrder === 'ASC' }
+          onChange={ (e) => setTypeOfOrder(e.target.value) }
+        />
+        <label htmlFor="ASC">ASC</label>
+
+        <input
+          type="radio"
+          data-testid="column-sort-input-desc"
+          name="ASC"
+          value="DESC"
+          id="DESC"
+          // checked={ typeOfOrder === 'DESC' }
+          onChange={ (e) => setTypeOfOrder(e.target.value) }
+        />
+        <label htmlFor="DESC">DESC</label>
+        <button
+          data-testid="column-sort-button"
+          onClick={ sortSubmit }
+        >
+          ORDENAR
+        </button>
+
         {filtered.map((filter) => (
-          <h4>
-            {`$
-            {filter.subject}
-            $
-            {filter.comparision}
-            $
-            {filter.valueFilter}
-            `}
-          </h4>
-        ))} */}
+          <span key={ filter.subject }>
+            {`${filter.subject} | ${filter.comparision} | ${filter.valueFilter} |`}
+
+          </span>
+        ))}
       </section>
       <table>
         <thead>
