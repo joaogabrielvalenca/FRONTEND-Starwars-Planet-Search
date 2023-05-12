@@ -50,10 +50,10 @@ function Table() {
     });
     setPlanetsData(filteredData);
 
-    setFiltered((previousFilters) => [
-      ...previousFilters,
-      { subject, comparision, valueFilter },
-    ]);
+    // setFiltered((previousFilters) => [
+    //   ...previousFilters,
+    //   { subject, comparision, valueFilter },
+    // ]);
   };
   const planetsDatCopy = [...planetsData];
 
@@ -169,12 +169,12 @@ function Table() {
           ORDENAR
         </button>
 
-        {filtered.map((filter) => (
+        {/* {filtered.map((filter) => (
           <span key={ filter.subject }>
             {`${filter.subject} | ${filter.comparision} | ${filter.valueFilter} |`}
 
           </span>
-        ))}
+        ))} */}
       </section>
       <table>
         <thead>
@@ -199,7 +199,7 @@ function Table() {
             <tr key={ data.name }>
               <td data-testid="planet-name">{data.name}</td>
               <td>{data.rotation_period}</td>
-              <td>{data.orbital_period}</td>
+              <td data-testid="orbital-period">{data.orbital_period}</td>
               <td>{data.diameter}</td>
               <td>{data.climate}</td>
               <td>{data.gravity}</td>

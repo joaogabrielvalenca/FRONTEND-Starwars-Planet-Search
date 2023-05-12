@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import userEvent from "@testing-library/user-event";
+import { render, screen, waitFor, fireEvent  } from '@testing-library/react';
 import App from '../App';
 import { fetchData } from '../services/fetch';
 import Table from '../components/Table';
@@ -85,31 +86,27 @@ describe('Testa os filtros da aplicação', () => {
     });
   }, { timeout: 10000 });
 });
-  test('verifica se os dados do filtro são renderizados corretamente', () => {
-  render(<App />);
+  test('Verifica se o filtro de column adiciona o filtro maior que...', async () => {
+    render(<App />);
+    // const planet1El = await screen.findByRole('cell', {  name: /tatooine/i});
+    // expect(planet1El).toBeInTheDocument();
 
-  const subjectSelect = screen.getByTestId('column-filter');
-  const comparisonSelect = screen.getByTestId('comparison-filter');
-  const valueInput = screen.getByTestId('value-filter');
-  const filterButton = screen.getByTestId('button-filter');
+    const columnEl = screen.getByTestId('column-filter');
+    userEvent.selectOptions(columnEl, ['diameter'])
 
-  // Verifica se os filtros estão vazios inicialmente
-  expect(subjectSelect).toHaveValue('population');
-  expect(comparisonSelect).toHaveValue('maior que');
-  expect(valueInput).toHaveValue(0);
+    const comparisonEl = screen.getByTestId('comparison-filter');
+    userEvent.selectOptions(comparisonEl, ['maior que']);
 
-  // Preenche os filtros
-  fireEvent.change(subjectSelect, { target: { value: 'population' } });
-  fireEvent.change(comparisonSelect, { target: { value: 'igual a' } });
-  fireEvent.change(valueInput, { target: { value: 5000 } });
+    const valueEl = screen.getByTestId('value-filter');
+    userEvent.type(valueEl, '100000');
 
-  // Clica no botão de filtrar
-  fireEvent.click(filterButton);
+    const btnFilter = screen.getByTestId('button-filter');
+    userEvent.click(btnFilter);
 
-  // Verifica se os filtros foram preenchidos corretamente
-  expect(subjectSelect).toHaveValue('population');
-  expect(comparisonSelect).toHaveValue('igual a');
-  expect(valueInput).toHaveValue(5000);
+    expect(screen.getByRole('cell', {  name: /bespin/i})).toBeInTheDocument();
+    expect(screen.queryByRole('cell', {  name: /tatooine/i})).not.toBeInTheDocument();
+  });
+
 });
 test('filtra os planetas corretamente', async () => {
   render(<App />);
@@ -155,65 +152,32 @@ test('filtro de nome', async () => {
   })
 
 });
-//   test('sort planets by orbital period', async () => {
-//   render(<App />);
-//     const orbitalPeriodOption = await screen.getByTestId('column-sort');
-//     fireEvent.change(orbitalPeriodOption, { target: {value: 'orbital_period'}})
-//   const descRadioButton = screen.getByTestId('column-sort-input-desc');
-//   fireEvent.click(descRadioButton);
-//   const sortButton = screen.getByTestId('column-sort-button');
-//     fireEvent.click(sortButton);
-//   await waitFor(() => {
-//     const planets = screen.getAllByText(/Orbital Period/);
-//     expect (planets[0].orbital_period).toBe('5110')
-//   });
-// });
-
-test('testa o filtro ascendente e descendente', async () => {
-  // renderiza a aplicação
+test('testando filtro de ordenar descendente', async () => {
   render(<App />);
-
-  // aguarda o fetch dos dados da API
-  // await screen.findByText(/loading/i, {}, { timeout: 4000 });
-
-  // encontra o select de coluna para ordenar
-  const selectEl = screen.getByTestId('column-sort');
-
-  // seleciona "rotation_period"
-  userEvent.selectOptions(selectEl, 'rotation_period');
-
-  // encontra o input radio "ASC"
-  const radioAscEl = screen.getByTestId('column-sort-input-asc');
-
-  // clica no input radio "ASC"
-  userEvent.click(radioAscEl);
-
-  // encontra o botão de ordenar e clica
-  const sortButtonEl = screen.getByTestId('column-sort-button');
-  userEvent.click(sortButtonEl);
-
-  // encontra os elementos da tabela que deveriam estar ordenados em ASC
-  const sortedElementsAsc = screen.getAllByTestId('table-row-planet');
-  const sortedValuesAsc = sortedElementsAsc.map((el) => el.querySelector('[data-testid="rotation_period"]').textContent.trim());
-
-  // verifica se os valores estão de fato ordenados em ASC
-  expect(sortedValuesAsc).toEqual(sortedValuesAsc.sort((a, b) => a - b));
-
-  // encontra o input radio "DESC"
-  const radioDescEl = screen.getByTestId('column-sort-input-desc');
-
-  // clica no input radio "DESC"
-  userEvent.click(radioDescEl);
-
-  // clica no botão de ordenar novamente
-  userEvent.click(sortButtonEl);
-
-  // encontra os elementos da tabela que deveriam estar ordenados em DESC
-  const sortedElementsDesc = screen.getAllByTestId('table-row-planet');
-  const sortedValuesDesc = sortedElementsDesc.map((el) => el.querySelector('[data-testid="rotation_period"]').textContent.trim());
-
-  // verifica se os valores estão de fato ordenados em DESC
-  expect(sortedValuesDesc).toEqual(sortedValuesDesc.sort((a, b) => b - a));
+  const orbitalPeriodOption = await screen.getByTestId('column-sort');
+  fireEvent.change(orbitalPeriodOption, { target: {value: 'orbital_period'}})
+  const descRadioButton = screen.getByTestId('column-sort-input-desc');
+  fireEvent.click(descRadioButton);
+  const sortButton = screen.getByTestId('column-sort-button');
+  fireEvent.click(sortButton);
+  await waitFor(() => {
+    const orbitalPeriods = screen.queryAllByTestId('orbital-period');
+    expect(orbitalPeriods.length).toBeGreaterThan(0);
+    expect(orbitalPeriods[0]).toHaveTextContent('5110');
+  });
+});
+  test('testando filtro de ordenar ascendente', async () => {
+  render(<App />);
+  const orbitalPeriodOption = await screen.getByTestId('column-sort');
+  fireEvent.change(orbitalPeriodOption, { target: {value: 'orbital_period'}})
+  const descRadioButton = screen.getByTestId('column-sort-input-asc');
+  fireEvent.click(descRadioButton);
+  const sortButton = screen.getByTestId('column-sort-button');
+  fireEvent.click(sortButton);
+  await waitFor(() => {
+    const orbitalPeriods = screen.queryAllByTestId('orbital-period');
+    expect(orbitalPeriods.length).toBeGreaterThan(0);
+    expect(orbitalPeriods[0]).toHaveTextContent('304');
+  });
 });
 
-})
