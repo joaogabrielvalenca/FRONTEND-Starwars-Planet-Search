@@ -9,7 +9,7 @@ function Table() {
     'population', 'orbital_period', 'diameter', 'rotation_period', 'surface_water']);
   const [comparision, setComparision] = useState('maior que');
   const [valueFilter, setValueFilter] = useState(0);
-  const [filtered, setFiltered] = useState([]);
+  // const [filtered, setFiltered] = useState([]);
   const [subjectOrder, setSubjectOrder] = useState([]);
   const [typeOfOrder, setTypeOfOrder] = useState('ASC');
 
