@@ -29,6 +29,10 @@ function Table() {
   }, [subjectList]);
 
   // FILTRO PARA NOME
+  const nameFilter = planetsData.filter(
+    (planet) => planet.name.includes(name),
+  );
+  console.log(nameFilter);
 
   // FILTRO PARA FILTROS MULTIPLOS NO SUBMIT
   const buttonSubmit = () => {
@@ -42,7 +46,7 @@ function Table() {
       } if (comparision === 'igual a' && planet[subject] === valueFilter) {
         return planet;
       }
-      // return planet;
+      return console.log(planet);
     });
     setPlanetsData(filteredData);
 
@@ -51,10 +55,18 @@ function Table() {
       { subject, comparision, valueFilter },
     ]);
   };
+  const planetsDatCopy = [...planetsData];
+
+  const sortedDesc = planetsDatCopy.sort((a, b) => {
+    if (a[subjectOrder] === 'unknown') return Number('1');
+    if (b[subjectOrder] === 'unknown') return Number('-1');
+    if (a[subjectOrder] === b[subjectOrder]) return Number('0');
+    return b[subjectOrder] - a[subjectOrder];
+  });
 
   const sortSubmit = () => {
     if (typeOfOrder === 'ASC') {
-      const sortedAsc = planetsData.sort((a, b) => {
+      const sortedAsc = planetsDatCopy.sort((a, b) => {
         if (a[subjectOrder] === 'unknown') return Number('1');
         if (b[subjectOrder] === 'unknown') return Number('-1');
         if (a[subjectOrder] === b[subjectOrder]) return Number('0');
@@ -62,23 +74,13 @@ function Table() {
       });
       setPlanetsData(sortedAsc);
     } if (typeOfOrder === 'DESC') {
-      const sortedDesc = planetsData.sort((a, b) => {
-        if (a[subjectOrder] === 'unknown') return Number('1');
-        if (b[subjectOrder] === 'unknown') return Number('-1');
-        if (a[subjectOrder] === b[subjectOrder]) return Number('0');
-        return b[subjectOrder] - a[subjectOrder];
-      });
       setPlanetsData(sortedDesc);
     }
     // return planetsData;
   };
 
-  const nameFilter = planetsData.filter(
-    (planet) => planet.name.includes(name),
-  );
-
-  console.log(typeOfOrder);
-  console.log(subjectOrder);
+  // console.log(typeOfOrder);
+  // console.log(subjectOrder);
   // console.log(planetsData);
   // console.log(nameFilter);
 
@@ -195,7 +197,7 @@ function Table() {
         <tbody>
           {nameFilter.map((data) => (
             <tr key={ data.name }>
-              <td>{data.name}</td>
+              <td data-testid="planet-name">{data.name}</td>
               <td>{data.rotation_period}</td>
               <td>{data.orbital_period}</td>
               <td>{data.diameter}</td>
