@@ -9,32 +9,27 @@ function Table() {
     'population', 'orbital_period', 'diameter', 'rotation_period', 'surface_water']);
   const [comparision, setComparision] = useState('maior que');
   const [valueFilter, setValueFilter] = useState(0);
-  // const [filtered, setFiltered] = useState([]);
+  const [filtered, setFiltered] = useState([]);
   const [subjectOrder, setSubjectOrder] = useState([]);
   const [typeOfOrder, setTypeOfOrder] = useState('ASC');
+  const [newPlanetsData, setNewPlanetsData] = useState([]);
 
-  // FUNÇÃO PARA FETCH API COM USEEFFECT
   const fetchMyApi = useCallback(async () => {
     const response = await fetchData;
     setPlanetsData(response.results);
+    setNewPlanetsData(response.results);
   }, []);
-
   useEffect(() => {
     fetchMyApi();
   }, [fetchMyApi]);
-
   useEffect(() => {
     setSubject(subjectList[0]);
     setSubjectOrder(subjectList[0]);
-  }, [subjectList]);
+  }, [subjectList, filtered]);
 
-  // FILTRO PARA NOME
   const nameFilter = planetsData.filter(
     (planet) => planet.name.includes(name),
   );
-  console.log(nameFilter);
-
-  // FILTRO PARA FILTROS MULTIPLOS NO SUBMIT
   const buttonSubmit = () => {
     const filteredData = planetsData.filter((planet) => {
       const findSubject = subjectList.find((item) => item === subject);
@@ -50,10 +45,10 @@ function Table() {
     });
     setPlanetsData(filteredData);
 
-    // setFiltered((previousFilters) => [
-    //   ...previousFilters,
-    //   { subject, comparision, valueFilter },
-    // ]);
+    setFiltered((previousFilters) => [
+      ...previousFilters,
+      { subject, comparision, valueFilter },
+    ]);
   };
   const planetsDatCopy = [...planetsData];
 
@@ -64,6 +59,37 @@ function Table() {
     return b[subjectOrder] - a[subjectOrder];
   });
 
+  const onDeleteFilter = (index) => {
+    const elementToSplice = filtered;
+    const abc = elementToSplice.splice(index, 1);
+    setFiltered(elementToSplice);
+    const deletedSubject = abc[0].subject;
+    filtered.forEach((fil) => {
+      const filteredData = newPlanetsData.filter((planet) => {
+        if (fil.comparision === 'maior que') {
+          return Number(planet[fil.subject]) > fil.valueFilter;
+        } if (fil.comparision === 'menor que') {
+          return Number(planet[fil.subject]) < fil.valueFilter;
+        } if (fil.comparision === 'igual a'
+          && planet[fil.subject] === fil.valueFilter) {
+          return planet;
+        }
+        return console.log(fil);
+      });
+      setPlanetsData(filteredData);
+    });
+    setSubjectList((prevSubject) => [
+      ...prevSubject, deletedSubject,
+    ]);
+    if (filtered.length === 0) return setPlanetsData(newPlanetsData);
+  };
+
+  const removeAllFilters = () => {
+    setFiltered([]);
+    setPlanetsData(newPlanetsData);
+    setSubjectList(['population', 'orbital_period', 'diameter', 'rotation_period',
+      'surface_water']);
+  };
   const sortSubmit = () => {
     if (typeOfOrder === 'ASC') {
       const sortedAsc = planetsDatCopy.sort((a, b) => {
@@ -76,14 +102,7 @@ function Table() {
     } if (typeOfOrder === 'DESC') {
       setPlanetsData(sortedDesc);
     }
-    // return planetsData;
   };
-
-  // console.log(typeOfOrder);
-  // console.log(subjectOrder);
-  // console.log(planetsData);
-  // console.log(nameFilter);
-
   return (
     <>
       <section>
@@ -101,12 +120,10 @@ function Table() {
           onChange={ (e) => setSubject(e.target.value) }
           data-testid="column-filter"
         >
-
           {subjectList.map((
             subjects,
           ) => (<option key={ subjects } value={ subjects }>{ subjects }</option>))}
         </select>
-
         <select
           value={ comparision }
           onChange={ (e) => setComparision(e.target.value) }
@@ -128,37 +145,31 @@ function Table() {
         >
           FILTRAR
         </button>
-
         <h4>Ordenação de coluna</h4>
         <select
           value={ subjectOrder }
           onChange={ (e) => setSubjectOrder(e.target.value) }
           data-testid="column-sort"
         >
-
           {subjectList.map((
             subjects,
           ) => (<option key={ subjects } value={ subjects }>{ subjects }</option>))}
         </select>
-
         <input
           type="radio"
           data-testid="column-sort-input-asc"
           name="ASC"
           value="ASC"
           id="ASC"
-          // checked={ typeOfOrder === 'ASC' }
           onChange={ (e) => setTypeOfOrder(e.target.value) }
         />
         <label htmlFor="ASC">ASC</label>
-
         <input
           type="radio"
           data-testid="column-sort-input-desc"
           name="ASC"
           value="DESC"
           id="DESC"
-          // checked={ typeOfOrder === 'DESC' }
           onChange={ (e) => setTypeOfOrder(e.target.value) }
         />
         <label htmlFor="DESC">DESC</label>
@@ -168,13 +179,27 @@ function Table() {
         >
           ORDENAR
         </button>
-
-        {/* {filtered.map((filter) => (
-          <span key={ filter.subject }>
-            {`${filter.subject} | ${filter.comparision} | ${filter.valueFilter} |`}
-
+        {filtered.map((filter, index) => (
+          <span
+            key={ filter.subject }
+            data-testid="filter"
+            id={ `buttonDelete ${index}` }
+          >
+            {`${filter.subject} | ${filter.comparision} | ${filter.valueFilter}  `}
+            <button
+              onClick={ () => onDeleteFilter(index) }
+            >
+              deletar
+            </button>
           </span>
-        ))} */}
+        ))}
+
+        <button
+          data-testid="button-remove-filters"
+          onClick={ removeAllFilters }
+        >
+          REMOVER FILTROS
+        </button>
       </section>
       <table>
         <thead>
@@ -217,5 +242,4 @@ function Table() {
     </>
   );
 }
-
 export default Table;

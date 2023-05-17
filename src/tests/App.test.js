@@ -1,9 +1,9 @@
 import React from 'react';
 import userEvent from "@testing-library/user-event";
-import { render, screen, waitFor, fireEvent  } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, waitForElementToBeRemoved  } from '@testing-library/react';
 import App from '../App';
 import { fetchData } from '../services/fetch';
-import Table from '../components/Table';
+import testData  from '../../cypress/mocks/testData'
 
 describe('Testa os filtros da aplicação', () => {
   test('verifica se há o título star wars', () => {
@@ -71,13 +71,9 @@ describe('Testa os filtros da aplicação', () => {
     expect(edited).toBeInTheDocument();
     expect(url).toBeInTheDocument();
   });
-  // test('verifica se os itens da API foram renderizados', async () => {
-  //   jest.setTimeout(15000);
-  //   render(<App />);
-  //   await waitFor(() => expect(screen.getByText('Tatooine')).toBeInTheDocument());
-  // });
+
   test('verifica se os itens da API foram renderizados após um intervalo de 10 segundos', async () => {
-    jest.setTimeout(15000);
+    // jest.setTimeout(15000);
 
     render(<App />);
     await waitFor(() => {
@@ -86,57 +82,9 @@ describe('Testa os filtros da aplicação', () => {
     });
   }, { timeout: 10000 });
 });
-  test('Verifica se o filtro de column adiciona o filtro maior que...', async () => {
-    render(<App />);
-    // const planet1El = await screen.findByRole('cell', {  name: /tatooine/i});
-    // expect(planet1El).toBeInTheDocument();
-
-    const columnEl = screen.getByTestId('column-filter');
-    userEvent.selectOptions(columnEl, ['diameter'])
-
-    const comparisonEl = screen.getByTestId('comparison-filter');
-    userEvent.selectOptions(comparisonEl, ['maior que']);
-
-    const valueEl = screen.getByTestId('value-filter');
-    userEvent.type(valueEl, '100000');
-
-    const btnFilter = screen.getByTestId('button-filter');
-    userEvent.click(btnFilter);
-
-    expect(screen.getByRole('cell', {  name: /bespin/i})).toBeInTheDocument();
-    expect(screen.queryByRole('cell', {  name: /tatooine/i})).not.toBeInTheDocument();
-  });
 
 });
-test('filtra os planetas corretamente', async () => {
-  render(<App />);
-  jest.setTimeout(15000);
 
-
-  const columnFilter = screen.getByTestId('column-filter');
-  fireEvent.change(columnFilter, { target: { value: 'orbital_period' } });
-
-
-  const comparisonFilter = screen.getByTestId('comparison-filter');
-  fireEvent.change(comparisonFilter, { target: { value: 'maior que' } });
-
-
-  const valueFilter = screen.getByTestId('value-filter');
-  fireEvent.change(valueFilter, { target: { value: 500 } });
-
-  const buttonFilter = screen.getByTestId('button-filter');
-  fireEvent.click(buttonFilter);
-
-  waitFor(() => {
-
-    expect(screen.queryByText('Alderaan')).not.toBeInTheDocument();
-    expect(screen.queryByText('Yavin IV')).toBeInTheDocument();
-    expect(screen.queryByText('Bespin')).toBeInTheDocument();
-  });
-
-
-  // expect(screen.queryByText('orbital_period')).not.toBeInTheDocument();
-});
 test('filtro de nome', async () => {
   render(<App />);
   jest.setTimeout(30000);
@@ -145,7 +93,7 @@ test('filtro de nome', async () => {
   const name = 'Tat';
   fireEvent.change(nameFilterInput, { target: { value: name } });
 
-  waitFor(() => {
+  await waitFor(() => {
   screen.findByRole('table');
   const filteredPlanet = screen.getByText('Tatooine');
   expect(filteredPlanet).toBeInTheDocument();
@@ -181,3 +129,272 @@ test('testando filtro de ordenar descendente', async () => {
   });
 });
 
+//TESTES NO PAU!
+//TESTES NO PAU!!
+//TESTES NO PAU!!!
+//TESTES NO PAU!!!!
+//TESTES NO PAU!!!!!
+
+ test('Testa o botão de deletar filtro', async () => {
+    render(<App />);
+    // jest.setTimeout(15000);
+
+
+   expect(await screen.findByText('Hoth')).toBeInTheDocument();
+
+    const columnFilter1 = screen.getByTestId('column-filter');
+    fireEvent.change(columnFilter1, { target: { value: 'population' } });
+
+
+    const comparisonFilter1 = screen.getByTestId('comparison-filter');
+    fireEvent.change(comparisonFilter1, { target: { value: 'maior que' } });
+
+
+    const valueFilter1 = screen.getByTestId('value-filter');
+    fireEvent.change(valueFilter1, { target: { value: '0' } });
+
+    const buttonFilter1 = screen.getByTestId('button-filter');
+   fireEvent.click(buttonFilter1);
+
+
+    const columnFilter2 = screen.getByTestId('column-filter');
+    fireEvent.change(columnFilter2, { target: { value: 'orbital_period' } });
+
+
+    const comparisonFilter2 = screen.getByTestId('comparison-filter');
+    fireEvent.change(comparisonFilter2, { target: { value: 'maior que' } });
+
+
+    const valueFilter2 = screen.getByTestId('value-filter');
+    fireEvent.change(valueFilter2, { target: { value: '444' } });
+
+    const buttonFilter2 = screen.getByTestId('button-filter');
+   fireEvent.click(buttonFilter2);
+
+  //  screen.debug();
+  //  await waitForElementToBeRemoved(await screen.queryByText('Hoth'))
+
+   await waitFor(() => {
+
+      expect(screen.getByText('Yavin IV')).toBeInTheDocument();
+      expect(screen.getAllByTestId('planet-name').length).toBe(3)
+  });
+
+   const buttonToDelete = screen.getAllByText('deletar');
+   fireEvent.click(buttonToDelete[0])
+   console.log('aiehiuaheiuhaiujkfb giuyhgbfWYGYWFUOYEGfy', buttonToDelete)
+
+   await waitFor(() => {
+
+    expect(screen.getByText('Yavin IV')).toBeInTheDocument();
+   });
+   expect(await screen.findByText('Hoth')).toBeInTheDocument();
+ });
+
+ test('Testa o botão de deletar filtro', async () => {
+    render(<App />);
+    // jest.setTimeout(15000);
+
+
+    const columnFilter1 = screen.getByTestId('column-filter');
+    fireEvent.change(columnFilter1, { target: { value: 'population' } });
+
+
+    const comparisonFilter1 = screen.getByTestId('comparison-filter');
+    fireEvent.change(comparisonFilter1, { target: { value: 'igual a' } });
+
+
+    const valueFilter1 = screen.getByTestId('value-filter');
+    fireEvent.change(valueFilter1, { target: { value: '0' } });
+
+    const buttonFilter1 = screen.getByTestId('button-filter');
+   fireEvent.click(buttonFilter1);
+
+
+    const columnFilter2 = screen.getByTestId('column-filter');
+    fireEvent.change(columnFilter2, { target: { value: 'orbital_period' } });
+
+
+    const comparisonFilter2 = screen.getByTestId('comparison-filter');
+    fireEvent.change(comparisonFilter2, { target: { value: 'maior que' } });
+
+
+    const valueFilter2 = screen.getByTestId('value-filter');
+    fireEvent.change(valueFilter2, { target: { value: '444' } });
+
+    const buttonFilter2 = screen.getByTestId('button-filter');
+   fireEvent.click(buttonFilter2);
+
+   const buttonToDelete = screen.getAllByTestId('filter')
+   fireEvent.click(buttonToDelete[0])
+
+    waitFor(() => {
+
+      expect(screen.queryByText('Tatooine')).not.toBeInTheDocument();
+      expect(screen.queryByText('Yavin IV')).toBeInTheDocument();
+  });
+ });
+
+ test('filtra os planetas com maior que', async () => {
+  render(<App />);
+  jest.setTimeout(15000);
+
+
+  const columnFilter = screen.getByTestId('column-filter');
+  fireEvent.change(columnFilter, { target: { value: 'orbital_period' } });
+
+
+  const comparisonFilter = screen.getByTestId('comparison-filter');
+  fireEvent.change(comparisonFilter, { target: { value: 'maior que' } });
+
+
+  const valueFilter = screen.getByTestId('value-filter');
+  fireEvent.change(valueFilter, { target: { value: 500 } });
+
+  const buttonFilter = screen.getByTestId('button-filter');
+  fireEvent.click(buttonFilter);
+
+
+  await waitFor(() => {
+
+
+    expect(columnFilter).not.toHave('orbital_period');
+  });
+    expect(await screen.queryByText('Alderaan')).not.toBeInTheDocument();
+    expect(await screen.queryByText('Yavin IV')).toBeInTheDocument();
+    expect(await screen.queryByText('Bespin')).toBeInTheDocument();
+});
+test('filtra os planetas com menor que', async () => {
+  jest.spyOn(global,'fetch').mockImplementation(testData)
+  render(<App />);
+
+     const abc = await screen.findAllByTestId('planet-name')
+
+
+    const columnFilter = screen.getByTestId('column-filter');
+    fireEvent.change(columnFilter, { target: { value: 'diameter' } });
+
+
+    const comparisonFilter = screen.getByTestId('comparison-filter');
+    fireEvent.change(comparisonFilter, { target: { value: 'menor que' } });
+
+
+    const valueFilter = screen.getByTestId('value-filter');
+    fireEvent.change(valueFilter, { target: { value: '10465' } });
+
+    const buttonFilter = screen.getByTestId('button-filter');
+   fireEvent.click(buttonFilter);
+
+    // await waitFor(() => {
+
+
+    // });
+
+  expect(await screen.queryByText('Tatooine')).not.toBeInTheDocument();
+  expect(await screen.queryByText('Yavin IV')).toBeInTheDocument();
+});
+
+test('filtra os planetas com igual a', async () => {
+   jest.spyOn(global,'fetch').mockImplementation(testData)
+    render(<App />);
+    // jest.setTimeout(15000);
+
+    const abc = await screen.findAllByTestId('planet-name')
+
+    const columnFilter = screen.getByTestId('column-filter');
+    fireEvent.change(columnFilter, { target: { value: 'population' } });
+
+
+    const comparisonFilter = screen.getByTestId('comparison-filter');
+    fireEvent.change(comparisonFilter, { target: { value: 'igual a' } });
+
+
+    const valueFilter = screen.getByTestId('value-filter');
+    fireEvent.change(valueFilter, { target: { value: '200000' } });
+
+    const buttonFilter = screen.getByTestId('button-filter');
+   fireEvent.click(buttonFilter);
+
+
+   const test = screen.queryByText('Tatooine');
+   expect(test).toBeInTheDocument();
+   console.log(test);
+
+ });
+
+  test('Testa o botão de deletar todos os filtros', async () => {
+    render(<App />);
+    // jest.setTimeout(15000);
+
+
+    const columnFilter1 = screen.getByTestId('column-filter');
+    fireEvent.change(columnFilter1, { target: { value: 'population' } });
+
+
+    const comparisonFilter1 = screen.getByTestId('comparison-filter');
+    fireEvent.change(comparisonFilter1, { target: { value: 'igual a' } });
+
+
+    const valueFilter1 = screen.getByTestId('value-filter');
+    fireEvent.change(valueFilter1, { target: { value: '0' } });
+
+    const buttonFilter1 = screen.getByTestId('button-filter');
+   fireEvent.click(buttonFilter1);
+
+
+    const columnFilter2 = screen.getByTestId('column-filter');
+    fireEvent.change(columnFilter2, { target: { value: 'orbital_period' } });
+
+
+    const comparisonFilter2 = screen.getByTestId('comparison-filter');
+    fireEvent.change(comparisonFilter2, { target: { value: 'maior que' } });
+
+
+    const valueFilter2 = screen.getByTestId('value-filter');
+    fireEvent.change(valueFilter2, { target: { value: '444' } });
+
+    const buttonFilter2 = screen.getByTestId('button-filter');
+   fireEvent.click(buttonFilter2);
+
+
+    const columnFilter3= screen.getByTestId('column-filter');
+    fireEvent.change(columnFilter3, { target: { value: 'orbital_period' } });
+
+
+    const comparisonFilter3 = screen.getByTestId('comparison-filter');
+    fireEvent.change(comparisonFilter3, { target: { value: 'maior que' } });
+
+
+    const valueFilter3 = screen.getByTestId('value-filter');
+    fireEvent.change(valueFilter3, { target: { value: '444' } });
+
+    const buttonFilter3 = screen.getByTestId('button-filter');
+   fireEvent.click(buttonFilter3);
+
+   const buttonToDelete = screen.getByTestId("button-remove-filters")
+   fireEvent.click(buttonToDelete)
+
+   await waitFor(() => {
+
+      expect(screen.queryByText('Tatooine')).toBeInTheDocument();
+      expect(screen.queryByText('Alderaan')).toBeInTheDocument();
+      expect(screen.queryByText('Yavin IV')).toBeInTheDocument()
+      expect(screen.queryByText('Hoth')).toBeInTheDocument()
+      expect(screen.queryByText('Dagobah')).toBeInTheDocument()
+      expect(screen.queryByText('Bespin')).toBeInTheDocument()
+      expect(screen.queryByText('Endor')).toBeInTheDocument()
+      expect(screen.queryByText('Naboo')).toBeInTheDocument()
+      expect(screen.queryByText('Coruscant')).toBeInTheDocument()
+      expect(screen.queryByText('Kamino')).toBeInTheDocument()
+  });
+ });
+
+ test('Verifica se o botão de apagar todos os filtros está presente no documento', async () => {
+    render(<App />);
+    // jest.setTimeout(15000);
+
+   const buttonToDelete = screen.getByTestId("button-remove-filters")
+
+   expect(buttonToDelete).toBeInTheDocument();
+
+ })
